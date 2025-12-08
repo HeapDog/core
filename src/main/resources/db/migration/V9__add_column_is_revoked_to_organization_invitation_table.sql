@@ -1,0 +1,2 @@
+ALTER TABLE organization_invitation
+ADD COLUMN is_revoked BOOLEAN NOT NULL DEFAULT FALSE;

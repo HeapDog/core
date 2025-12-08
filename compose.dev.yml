@@ -1,0 +1,47 @@
+services:
+  backend-dev:
+    container_name: backend-dev
+    image: ${BACKEND_IMAGE:-backend-dev-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      JAVA_OPTS: ${JAVA_OPTS:-}
+      SERVER_PORT: ${SERVER_PORT:-9090}
+
+    ports:
+      - "${SERVER_PORT:-9090}:${SERVER_PORT:-9090}"
+    depends_on:
+      - db-dev
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:${SERVER_PORT:-9090}/actuator/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+    networks:
+      - heapdog-network-dev
+
+  db-dev:
+    container_name: db-dev
+    image: postgres:18.0-alpine3.22
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-}
+      POSTGRES_DB: ${DB_NAME:-heapdog}
+    volumes:
+      - db_data_dev:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - heapdog-network-dev
+
+volumes:
+  db_data_dev:
+
+networks:
+  heapdog-network-dev:
+    external: true

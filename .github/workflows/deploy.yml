@@ -1,0 +1,69 @@
+name: Deploy to VM via Tailscale
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch: { }
+
+concurrency:
+  group: deploy-to-vm
+  cancel-in-progress: true
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      image-sha: ${{ steps.set-sha.outputs.image_sha }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set image sha
+        id: set-sha
+        run: |
+          echo "image_sha=${GITHUB_SHA:0:7}" >> $GITHUB_OUTPUT
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PAT }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_REPO }}:backend-${{ steps.set-sha.outputs.image_sha }}
+            ${{ secrets.DOCKERHUB_REPO }}:backend-latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo (optional)
+        uses: actions/checkout@v4
+
+      - name: Start Tailscale
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+
+      - name: SSH to VM and deploy
+        run: |
+          BACKEND_IMAGE="${{ secrets.DOCKERHUB_REPO }}:backend-${{ needs.build-and-push.outputs.image-sha }}"
+          ssh -o "StrictHostKeyChecking no" ${{ secrets.INSTANCE_USER }}@${{ secrets.PROD_INSTANCE_TS_IP }} "
+            cd ${{ secrets.PROJECT_PATH }}/backend
+            export BACKEND_IMAGE='$BACKEND_IMAGE'
+            git checkout main
+            git fetch origin main
+            git reset --hard origin/main
+            docker pull $BACKEND_IMAGE || exit 1
+            docker compose pull backend || exit 1
+            docker compose up -d --force-recreate backend
+            docker image prune -af
+          "
