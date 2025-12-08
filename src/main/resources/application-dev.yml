@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: heapdog
+  datasource:
+    url: ${DATASOURCE_URL}
+    driver-class-name: ${DATASOURCE_DRIVER}
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_HIBERNATE_DDL_AUTO}
+    show-sql: ${JPA_SHOW_SQL:true}
+    properties:
+      hibernate:
+        format_sql: ${JPA_PROPERTIES_HIBERNATE_FORMAT_SQL:true}
+    database-platform: ${JPA_DATABASE_PLATFORM}
+
+bcrypt:
+  strength: ${BCRYPT_SALT_ROUNDS:10}
+
+jwt:
+  secret: ${JWT_SECRET}
+
+logging:
+  level:
+    org.springframework.security: debug
+server:
+  servlet:
+    context-path: /api/v1
+  port: ${SERVER_PORT:8080}
