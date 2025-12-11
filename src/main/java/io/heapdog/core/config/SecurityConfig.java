@@ -1,13 +1,17 @@
 package io.heapdog.core.config;
 
 
+import io.heapdog.core.feature.auth.JwtAuthenticationService;
+import io.heapdog.core.security.ApiKeyAuthEntryPoint;
+import io.heapdog.core.security.ApiKeyAuthenticationFilter;
+import io.heapdog.core.security.jwt.JwtAuthenticationEntryPoint;
 import io.heapdog.core.security.jwt.JwtAuthenticationFilter;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -36,10 +40,30 @@ import java.util.List;
 @AllArgsConstructor
 @Slf4j
 public class SecurityConfig {
+
+    @Order(1)
+    @Bean
+    SecurityFilterChain apiKeySecurityFilterChain(HttpSecurity http,
+                                                  AuthenticationManager authenticationManager,
+                                                  ApiKeyAuthEntryPoint apiKeyAuthEntryPoint) throws Exception {
+        return http
+                // FIX: Restrict this chain to only match /internal/** URLs
+                .securityMatcher("/internal/**")
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .addFilterBefore(new ApiKeyAuthenticationFilter(authenticationManager, apiKeyAuthEntryPoint), UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(apiKeyAuthEntryPoint))
+                .build();
+    }
+
+
+    @Order(2)
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                            JwtAuthenticationFilter jwtAuthenticationFilter
-                                            ) throws Exception {
+                                            JwtAuthenticationService jwtAuthenticationService,
+                                            JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint
+    ) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -50,15 +74,8 @@ public class SecurityConfig {
                     auth.anyRequest().authenticated();
                 })
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(exception -> {
-                    exception.authenticationEntryPoint((request, response, authException) -> {
-                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-                    });
-                    exception.accessDeniedHandler((request, response, accessDeniedException) -> {
-                        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-                    });
-                })
+                .addFilterBefore(new JwtAuthenticationFilter(jwtAuthenticationService, jwtAuthenticationEntryPoint), UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .build();
     }
 
