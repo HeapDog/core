@@ -10,4 +10,5 @@ public class OrganizationMemberResponseDto {
     private String username;
     private String email;
     private OrganizationRole role;
+    private Long membershipId;
 }
