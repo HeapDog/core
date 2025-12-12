@@ -118,7 +118,6 @@ public class OrganizationService {
         Organization organization = repository.findBySlug(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Organization", "slug", slug));
         organization.setOrgName(dto.getName() != null ? dto.getName() : organization.getOrgName());
-        organization.setSlug(dto.getSlug() != null ? dto.getSlug() : organization.getSlug());
         organization.setDescription(dto.getDescription() != null ? dto.getDescription() : organization.getDescription());
         organization.setEmail(dto.getEmail() != null ? dto.getEmail() : organization.getEmail());
         organization.setWebsite(dto.getWebsite() != null ? dto.getWebsite() : organization.getWebsite());
