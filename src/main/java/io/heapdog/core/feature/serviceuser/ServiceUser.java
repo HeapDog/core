@@ -5,6 +5,7 @@ import io.heapdog.core.shared.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
 import java.util.Set;
 
 @Builder
@@ -29,6 +30,6 @@ public class ServiceUser extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Set<ServiceUserPermission> permissions;
 
-
-
+    @Column(name = "last_accessed_at")
+    private Instant lastAccessedAt;
 }
