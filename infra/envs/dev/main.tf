@@ -8,12 +8,20 @@ terraform {
       source  = "hashicorp/google"
       version = "~> 5.0"
     }
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
   }
 }
 
 provider "google" {
   project = var.project_id
   region  = var.region
+}
+
+provider "aws" {
+  region = var.aws_region
 }
 
 module "network" {
@@ -34,4 +42,14 @@ module "heapdog_dev_instance" {
   disk_size_gb      = 20
   network_self_link = module.network.network_self_link
   subnet_self_link  = module.network.subnet_self_link
+}
+
+module "storage" {
+  source = "../../modules/storage"
+
+  bucket_name = var.bucket_name
+  tags = {
+    Environment = "dev"
+    Project     = "heapdog"
+  }
 }
