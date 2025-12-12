@@ -15,3 +15,11 @@ output "prod_instance_internal_ip" {
 output "network_name" {
   value = module.network.network_name
 }
+
+output "storage_bucket_id" {
+  value = module.storage.bucket_id
+}
+
+output "storage_bucket_arn" {
+  value = module.storage.bucket_arn
+}

@@ -35,3 +35,13 @@ module "heapdog_prod_instance" {
   network_self_link = module.network.network_self_link
   subnet_self_link  = module.network.subnet_self_link
 }
+
+module "storage" {
+  source = "../../modules/storage"
+
+  bucket_name = var.bucket_name
+  tags = {
+    Environment = "prod"
+    Project     = "heapdog"
+  }
+}
