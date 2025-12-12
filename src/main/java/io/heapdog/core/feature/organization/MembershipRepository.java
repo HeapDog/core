@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface MembershipRepository extends JpaRepository<Membership, Long> {
@@ -24,7 +25,8 @@ public interface MembershipRepository extends JpaRepository<Membership, Long> {
                     m.user.id,
                     m.user.username,
                     m.user.email,
-                    m.role
+                    m.role,
+                    m.id
                 )
                 FROM Membership m
                 WHERE m.organization.id = :organizationId
@@ -33,4 +35,11 @@ public interface MembershipRepository extends JpaRepository<Membership, Long> {
                 WHERE m.organization.id = :organizationId
             """)
     Page<OrganizationMemberResponseDto> findByOrganizationId(Long organizationId, Pageable pageable);
+
+    @Query("""
+                SELECT m FROM Membership m
+                JOIN FETCH m.organization
+                WHERE m.organization.id = :organizationId
+""")
+    List<Membership> findByOrganizationId(Long organizationId);
 }
