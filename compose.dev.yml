@@ -39,6 +39,15 @@ services:
     networks:
       - heapdog-network-dev
 
+  nats-dev:
+    container_name: nats-dev
+    image: nats:2.12.2-alpine3.22
+    ports:
+      - "4223:4222"
+      - "8223:8222"
+    networks:
+      - heapdog-network-dev
+
 volumes:
   db_data_dev:
 
