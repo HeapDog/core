@@ -8,6 +8,7 @@ import io.heapdog.core.feature.user.HeapDogUser;
 import io.heapdog.core.feature.user.HeapDogUserRepository;
 import io.heapdog.core.shared.ConstraintToFieldMapper;
 import io.heapdog.core.shared.DuplicateResourceException;
+import io.heapdog.core.shared.NatsPublisher;
 import io.heapdog.core.shared.ResourceNotFoundException;
 import io.heapdog.core.shared.util.OtpGenerator;
 import jakarta.transaction.Transactional;
@@ -38,6 +39,7 @@ public class OrganizationService {
     private final OrganizationInvitationMapper organizationInvitationMapper;
 
     private final NotificationRepository notificationRepository;
+    private final NatsPublisher natsPublisher;
 
     OrganizationBasicInfoResponseDto getBasicInfo(String slug) {
         Organization organization = repository.findBySlug(slug)
@@ -186,7 +188,8 @@ public class OrganizationService {
                 .recipient(user)
                 .type(NotificationType.INVITATION_SENT)
                 .build();
-        notificationRepository.save(notification);
+        Notification saved = notificationRepository.save(notification);
+        natsPublisher.publishNotificationEvent(saved.getId());
 
         return organizationInvitationMapper.toDto(savedInvitation);
     }
