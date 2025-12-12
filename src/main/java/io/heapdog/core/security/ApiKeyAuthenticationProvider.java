@@ -36,7 +36,7 @@ public class ApiKeyAuthenticationProvider implements AuthenticationProvider {
             return ApiKeyAuthenticationToken.authenticated(
                     serviceUser,
                     serviceUser.getPermissions().stream()
-                            .map(permission -> (GrantedAuthority) permission::name)
+                            .map(permission -> (GrantedAuthority) permission::getLabel)
                             .toList()
             );
         } else {
