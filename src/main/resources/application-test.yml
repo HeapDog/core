@@ -24,3 +24,7 @@ jwt:
 logging:
   level:
     org.springframework.security: trace
+
+nats:
+  url: ${NATS_URL:nats://localhost:4222}
+  notificationSubject: ${NATS_NOTIFICATION_SUBJECT:notifications}
