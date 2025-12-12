@@ -46,4 +46,8 @@ resource "google_compute_instance" "vm" {
   metadata = {
     enable-oslogin = "TRUE"
   }
+
+  lifecycle {
+    ignore_changes = [boot_disk[0].initialize_params[0].image]
+  }
 }
