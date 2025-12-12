@@ -111,4 +111,17 @@ public class HeapDogUserService {
                 .message("Email verified successfully.")
                 .build();
     }
+
+    InternalUserResponseDto getUserById(Long userId) {
+        HeapDogUser user = repository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
+        return InternalUserResponseDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .role(user.getRole().name())
+                .enabled(user.getEnabled())
+                .build();
+    }
+
+
 }
