@@ -93,6 +93,7 @@ public class OrganizationService {
                     .username(user.getUsername())
                     .email(user.getEmail())
                     .role(m.getRole())
+                    .membershipId(m.getId())
                     .build();
         });
     }
