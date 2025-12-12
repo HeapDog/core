@@ -279,6 +279,16 @@ public class OrganizationService {
             user.setCurrentMembership(membership);
             userRepository.save(user);
         }
+        // Create a notification and send it to the creator of the invitation
+        var creator = invitation.getCreatedBy();
+        Notification notification = Notification.builder()
+                .message(user.getUsername() + " has accepted the invitation to join the organization: " + invitation.getOrganization().getOrgName())
+                .link("/organizations/" + invitation.getOrganization().getSlug() + "/members")
+                .recipient(creator)
+                .type(NotificationType.INVITATION_ACCEPTED)
+                .build();
+        Notification savedNotification = notificationRepository.save(notification);
+        natsPublisher.publishNotificationEvent(savedNotification.getId());
         return organizationInvitationMapper.toOrganizationInvitationAcceptResponseDto(membership);
     }
 
