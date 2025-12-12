@@ -227,13 +227,6 @@ public class OrganizationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Organization", "slug", slug));
         Pageable pageable = PageRequest.of(page.intValue() - 1, size.intValue(), Sort.by("createdAt").ascending());
         log.info("Getting organization invitations for slug {}", slug);
-//        var invitations = organizationInvitationRepository.findOrganizationInvitationByOrganizationId(organization.getId(), pageable);
-//        var i = invitations.stream().map(organizationInvitationMapper::toOrganizationInvitationResponseDto)
-//                .toList();
-//        return  OrganizationInvitationsResponseDto.builder()
-//                .invitations(i)
-//                .build();
-//        return invitations.map(organizationInvitationMapper::toOrganizationInvitationResponseDto);
         return organizationInvitationRepository.findOrganizationInvitationsByOrganizationId(organization.getId(), pageable);
     }
 
