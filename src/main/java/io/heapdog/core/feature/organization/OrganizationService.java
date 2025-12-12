@@ -126,6 +126,18 @@ public class OrganizationService {
         organization.setPhone(dto.getPhone() != null ? dto.getPhone() : organization.getPhone());
         try {
             Organization updatedOrganization = repository.save(organization);
+            // send notification to all members about the update
+            var memberships = membershipRepository.findByOrganizationId(organization.getId());
+            for (var membership : memberships) {
+                Notification notification = Notification.builder()
+                        .message("The organization " + organization.getOrgName() + " has been updated.")
+                        .link("/organizations/" + organization.getSlug() + "/basic-info")
+                        .recipient(membership.getUser())
+                        .type(NotificationType.ORGANIZATION_UPDATED)
+                        .build();
+                Notification savedNotification = notificationRepository.save(notification);
+                natsPublisher.publishNotificationEvent(savedNotification.getId());
+            }
             return mapper.toBasicInfoDto(updatedOrganization);
         } catch (DataIntegrityViolationException ex) {
             Throwable root = ex.getCause();
