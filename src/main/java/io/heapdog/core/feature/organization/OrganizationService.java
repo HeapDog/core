@@ -298,14 +298,14 @@ public class OrganizationService {
         OrganizationInvitation invitation = organizationInvitationRepository
                 .findByOrganizationSlugAndCode(slug, code)
                 .orElseThrow(() -> new ResourceNotFoundException("Invitation", "code", code));
+        if (!invitation.getUser().getId().equals(userId)) {
+            throw new ResourceNotFoundException("Invitation", "code", code);
+        }
         if (invitation.getRevoked()) {
             throw new IllegalArgumentException("This invitation has been revoked.");
         }
         if (invitation.isAccepted()) {
             throw new IllegalArgumentException("This invitation has already been accepted.");
-        }
-        if (!invitation.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("This invitation is not for the current user.");
         }
         return organizationInvitationMapper.toOrganizationInvitationAcceptInfoResponseDto(invitation);
     }
