@@ -14,6 +14,12 @@ public class ServiceUserController {
     private final ServiceUserService serviceUserService;
 
 
+    @GetMapping("/{id}")
+    ResponseEntity<ServiceUserReadResponseDto> getServiceUser(@PathVariable Long id) {
+        var resp = serviceUserService.getServiceUser(id);
+        return ResponseEntity.ok(resp);
+    }
+
     @PostMapping
     ResponseEntity<ServiceUserCreateResponseDto>
     createServiceUser(@Valid @RequestBody ServiceUserCreateRequestDto request) {
