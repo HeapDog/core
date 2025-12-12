@@ -185,7 +185,7 @@ public class OrganizationService {
                 .message("You have been invited to join the organization: " + organization.getOrgName())
                 .link("/invitations/accept?code=" + savedInvitation.getCode() + "&org=" + organization.getSlug())
                 .recipient(user)
-                .type(NotificationType.INVITATION)
+                .type(NotificationType.INVITATION_SENT)
                 .build();
         notificationRepository.save(notification);
 
