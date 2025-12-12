@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +25,22 @@ public class NotificationService {
                 .link(link)
                 .build();
         return notificationRepository.save(notification);
+    }
+
+    @PreAuthorize("hasAuthority('read:notification')")
+    InternalNotificationResponseDto getNotificationById(Long notificationId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Notification", "id", notificationId.toString()));
+        return InternalNotificationResponseDto.builder()
+                .id(notification.getId())
+                .message(notification.getMessage())
+                .link(notification.getLink())
+                .read(notification.isRead())
+                .clicked(notification.isClicked())
+                .type(notification.getType())
+                .createdAt(notification.getCreatedAt())
+                .userId(notification.getRecipient().getId())
+                .build();
     }
 
     Page<NotificationResponseDto>
