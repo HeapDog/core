@@ -27,4 +27,10 @@ public class ServiceUserController {
         return ResponseEntity.ok(resp);
     }
 
+    @GetMapping("/permissions")
+    ResponseEntity<ServiceUserPermissionResponseDto> getAvailablePermissions() {
+        var resp = serviceUserService.getServiceUserPermissions();
+        return ResponseEntity.ok(resp);
+    }
+
 }
