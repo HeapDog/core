@@ -64,25 +64,13 @@ services:
       - heapdog-network
 
   nats:
-    container_name: nats-dev
+    container_name: nats
     image: nats:2.12.2-alpine3.22
     ports:
       - "4222:4222"
       - "8222:8222"
     networks:
       - heapdog-network
-
-  test:
-    build:
-      context: .
-      dockerfile: Dockerfile.test
-    working_dir: /home/gradle/app
-    environment:
-      SPRING_PROFILES_ACTIVE: test
-    volumes:
-      - .:/home/gradle/app
-      - ./build/reports:/home/gradle/app/build/reports
-    command: [ "./gradlew", "test", "jacocoTestReport", "--info" ]
 
 volumes:
   db_data_prod:
