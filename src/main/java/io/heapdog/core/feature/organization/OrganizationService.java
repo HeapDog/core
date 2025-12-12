@@ -11,6 +11,7 @@ import io.heapdog.core.shared.DuplicateResourceException;
 import io.heapdog.core.shared.ResourceNotFoundException;
 import io.heapdog.core.shared.util.OtpGenerator;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
@@ -291,5 +292,36 @@ public class OrganizationService {
             throw new IllegalArgumentException("This invitation is not for the current user.");
         }
         return organizationInvitationMapper.toOrganizationInvitationAcceptInfoResponseDto(invitation);
+    }
+
+    public OrganizationMemberResponseDto updateOrganizationMemberRole(String slug, Long membershipId, @Valid OrganizationMemberRoleUpdateRequestDto dto) {
+        Organization organization = repository.findBySlug(slug)
+                .orElseThrow(() -> new ResourceNotFoundException("Organization", "slug", slug));
+        Membership membership = membershipRepository.findById(membershipId)
+                .orElseThrow(() -> new ResourceNotFoundException("Membership", "id", membershipId.toString()));
+        if (!membership.getOrganization().getId().equals(organization.getId())) {
+            throw new ResourceNotFoundException("Membership", "id", membershipId.toString());
+        }
+        membership.setRole(dto.getRole());
+        Membership savedMembership = membershipRepository.save(membership);
+
+        // create notification to the user about role change
+        Notification notification = Notification.builder()
+                .message("Your role in the organization " + organization.getOrgName() + " has been changed to " + dto.getRole())
+                .link("/organizations/" + organization.getSlug() + "/members")
+                .recipient(savedMembership.getUser())
+                .type(NotificationType.ORGANIZATION_MEMBER_ROLE_UPDATED)
+                .build();
+        Notification savedNotification = notificationRepository.save(notification);
+        natsPublisher.publishNotificationEvent(savedNotification.getId());
+
+        var user = savedMembership.getUser();
+        return OrganizationMemberResponseDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .role(savedMembership.getRole())
+                .membershipId(savedMembership.getId())
+                .build();
     }
 }
