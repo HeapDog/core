@@ -107,4 +107,12 @@ public class OrganizationController {
         return organizationService.acceptInvitation(slug, dto, user.getId());
     }
 
+    @PreAuthorize("@organizationSecurity.isAdmin(#slug, authentication)")
+    @PatchMapping("/{slug}/membership/{membershipId}/role")
+    OrganizationMemberResponseDto updateOrganizationMemberRole(@PathVariable String slug,
+                                                             @PathVariable Long membershipId,
+                                                             @Valid @RequestBody OrganizationMemberRoleUpdateRequestDto dto) {
+        return organizationService.updateOrganizationMemberRole(slug, membershipId, dto);
+    }
+
 }
