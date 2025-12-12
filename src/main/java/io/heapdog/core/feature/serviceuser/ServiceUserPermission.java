@@ -8,16 +8,22 @@ public enum ServiceUserPermission {
     READ_SSE_TOKEN("read:sse_token");
 
     private final String label;
+    private final String description = switch (this) {
+        case READ_HEAPDOG_USER -> "Permission to read Heapdog user data.";
+        case WRITE_HEAPDOG_USER -> "Permission to modify Heapdog user data.";
+        case READ_NOTIFICATION -> "Permission to read notifications.";
+        case READ_SSE_TOKEN -> "Permission to read SSE tokens.";
+    };
 
-    private final String permission;
+    ServiceUserPermission(String description) {
+        this.label = description;
+    }
 
-    ServiceUserPermission(String permission) {
-        this.permission = permission;
     public String getLabel() {
         return label;
     }
 
-    public String getPermission() {
-        return permission;
+    public String getDescription() {
+        return description;
     }
 }
