@@ -29,6 +29,7 @@ dependencies {
     implementation 'org.mapstruct:mapstruct:1.6.3'
     implementation "org.projectlombok:lombok-mapstruct-binding:0.2.0"
     implementation 'org.flywaydb:flyway-database-postgresql'
+    implementation 'io.nats:jnats:2.24.1'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
