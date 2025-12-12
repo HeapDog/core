@@ -1,6 +1,7 @@
 package io.heapdog.core.shared;
 
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import io.heapdog.core.feature.auth.InvalidOtpException;
 import io.heapdog.core.feature.user.UserAlreadyVerifiedException;
 import io.heapdog.core.feature.user.UserNotFoundException;
@@ -259,6 +260,35 @@ public class GlobalControllerAdvice {
     @ExceptionHandler(exception = HttpMessageNotReadableException.class)
     ResponseEntity<ApiError> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex, HttpServletRequest request) {
         log.warn(ex.toString());
+
+        if (ex.getCause() instanceof InvalidFormatException ife && ife.getTargetType().isEnum()) {
+            String invalidValue = ife.getValue().toString();
+            String enumType = ife.getTargetType().getSimpleName();
+            String allowedValues = String.join(", ",
+                    List.of(ife.getTargetType().getEnumConstants()).stream()
+                            .map(Object::toString)
+                            .toList()
+            );
+
+            ApiError errorResponse = ApiError
+                    .builder()
+                    .timestamp(Instant.now())
+                    .status(HttpStatus.BAD_REQUEST.value())
+                    .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                    .code("INVALID_ENUM_VALUE")
+                    .message("Invalid enum value in request body")
+                    .details(List.of(
+                            ApiError.FieldError.builder()
+                                    .field(ife.getPath().get(0).getFieldName())
+                                    .message(String.format("Invalid value '%s' for enum '%s'. Allowed values are: %s",
+                                            invalidValue, enumType, allowedValues))
+                                    .build()
+                    ))
+                    .path(request.getRequestURI())
+                    .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+
         ApiError errorResponse = ApiError
                 .builder()
                 .timestamp(Instant.now())
