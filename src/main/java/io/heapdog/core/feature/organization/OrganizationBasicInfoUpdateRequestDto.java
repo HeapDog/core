@@ -12,8 +12,6 @@ public class OrganizationBasicInfoUpdateRequestDto {
 
     private String name;
 
-    private String slug;
-
     @Size(max = 100, message = "Description can be at most 100 characters")
     private String description;
 
