@@ -25,6 +25,11 @@ public class ApiKeyAuthenticationProvider implements AuthenticationProvider {
         Optional<ServiceUser> user = repository.findByApiKey(apiKey);
         if (user.isPresent()) {
             ServiceUser serviceUser = user.get();
+
+            // Update last accessed time
+            serviceUser.setLastAccessedAt(java.time.Instant.now());
+            repository.save(serviceUser);
+
             if (!serviceUser.isEnabled()) {
                 throw new BadCredentialsException("API Key is disabled");
             }
