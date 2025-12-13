@@ -58,11 +58,11 @@ jobs:
           BACKEND_IMAGE_DEV="${{ secrets.DOCKERHUB_REPO }}:backend-dev-${{ needs.build-and-push.outputs.image-sha }}"
           ssh -o "StrictHostKeyChecking no" ${{ secrets.INSTANCE_USER }}@${{ secrets.DEV_INSTANCE_TS_IP }} "
             cd ${{ secrets.PROJECT_PATH }}/core
-            export BACKEND_IMAGE='$BACKEND_IMAGE'
+            export BACKEND_IMAGE_DEV='BACKEND_IMAGE_DEV'
             git checkout dev
             git fetch origin dev
             git reset --hard origin/dev
-            docker pull $BACKEND_IMAGE || exit 1
+            docker pull BACKEND_IMAGE_DEV || exit 1
             make up backend-dev db-dev nats-dev env=dev skip_build=backend-dev
             docker image prune -af
           "
