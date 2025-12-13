@@ -63,7 +63,6 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             docker pull $BACKEND_IMAGE || exit 1
-            docker compose pull backend || exit 1
-            docker compose up -d --force-recreate backend
+            make up backend db nats env=prod skip_build=backend
             docker image prune -af
           "
