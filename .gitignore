@@ -37,6 +37,10 @@ out/
 .vscode/
 .env
 .env.local
+.env.prod.backend
+.env.prod.db
+.env.dev.backend
+.env.dev.db
 
 .terraform/
 .crash/
