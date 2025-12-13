@@ -62,7 +62,7 @@ jobs:
             git checkout dev
             git fetch origin dev
             git reset --hard origin/dev
-            docker pull BACKEND_IMAGE_DEV || exit 1
+            docker pull $BACKEND_IMAGE_DEV || exit 1
             make up backend-dev db-dev nats-dev env=dev skip_build=backend-dev
             docker image prune -af
           "
