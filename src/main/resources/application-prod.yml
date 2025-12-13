@@ -26,5 +26,5 @@ server:
   port: ${SERVER_PORT:8080}
 
 nats:
-  url: ${NATS_URL:nats://localhost:4222}
+  url: nats://${NATS_HOST:nats}:${NATS_PORT:4222}
   notificationSubject: ${NATS_NOTIFICATION_SUBJECT:notifications}

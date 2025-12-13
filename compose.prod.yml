@@ -1,0 +1,52 @@
+services:
+  backend:
+    container_name: backend-prod
+    image: ${BACKEND_IMAGE_PROD:-backend-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env.prod.backend
+    ports:
+      - "${BACKEND_PROD_HOST_PORT:-8080}:${BACKEND_PROD_CONTAINER_PORT:-8080}"
+    depends_on:
+      - db
+      - nats
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost:${BACKEND_PROD_CONTAINER_PORT:-8080}/actuator/health" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+    networks:
+      - heapdog-network
+
+  db:
+    container_name: db-prod
+    image: postgres:18.0-alpine3.22
+    env_file:
+      - .env.prod.db
+    volumes:
+      - db_data_prod:/var/lib/postgresql/data
+    ports:
+      - "${DB_PROD_HOST_PORT:-5432}:${DB_PROD_CONTAINER_PORT:-5432}"
+    networks:
+      - heapdog-network
+
+  nats:
+    container_name: nats-prod
+    image: nats:2.12.2-alpine3.22
+    ports:
+      - "${NATS_PROD_HOST_PORT:-4222}:${NATS_PROD_CONTAINER_PORT:-4222}"
+      - "${NATS_PROD_HTTP_HOST_PORT:-8222}:${NATS_PROD_HTTP_CONTAINER_PORT:-8222}"
+    networks:
+      - heapdog-network
+
+volumes:
+  db_data_prod:
+  jetbrains_cache:
+  vscode_server:
+
+networks:
+  heapdog-network:
+    external: true
