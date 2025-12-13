@@ -58,7 +58,7 @@ jobs:
           BACKEND_IMAGE_DEV="${{ secrets.DOCKERHUB_REPO }}:backend-dev-${{ needs.build-and-push.outputs.image-sha }}"
           ssh -o "StrictHostKeyChecking no" ${{ secrets.INSTANCE_USER }}@${{ secrets.DEV_INSTANCE_TS_IP }} "
             cd ${{ secrets.PROJECT_PATH }}/core
-            export BACKEND_IMAGE_DEV='BACKEND_IMAGE_DEV'
+            export BACKEND_IMAGE_DEV='$BACKEND_IMAGE_DEV'
             git checkout dev
             git fetch origin dev
             git reset --hard origin/dev
