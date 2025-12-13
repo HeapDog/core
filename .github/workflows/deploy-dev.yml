@@ -55,7 +55,7 @@ jobs:
 
       - name: SSH to VM and deploy
         run: |
-          BACKEND_IMAGE="${{ secrets.DOCKERHUB_REPO }}:backend-dev-${{ needs.build-and-push.outputs.image-sha }}"
+          BACKEND_IMAGE_DEV="${{ secrets.DOCKERHUB_REPO }}:backend-dev-${{ needs.build-and-push.outputs.image-sha }}"
           ssh -o "StrictHostKeyChecking no" ${{ secrets.INSTANCE_USER }}@${{ secrets.DEV_INSTANCE_TS_IP }} "
             cd ${{ secrets.PROJECT_PATH }}/core
             export BACKEND_IMAGE='$BACKEND_IMAGE'
