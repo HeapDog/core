@@ -1,24 +1,19 @@
 services:
   backend-dev:
     container_name: backend-dev
-    image: ${BACKEND_IMAGE:-backend-dev-latest}
+    image: ${BACKEND_IMAGE_DEV}
     build:
       context: .
       dockerfile: Dockerfile
     env_file:
-      - .env
-    environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
-      JAVA_OPTS: ${JAVA_OPTS:-}
-      SERVER_PORT: ${SERVER_PORT:-9090}
-
+      - .env.dev.backend
     ports:
-      - "${SERVER_PORT:-9090}:${SERVER_PORT:-9090}"
+      - "${BACKEND_DEV_HOST_PORT:-8080}:${BACKEND_DEV_CONTAINER_PORT:-8080}"
     depends_on:
       - db-dev
       - nats-dev
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:${SERVER_PORT:-9090}/actuator/health"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:${BACKEND_DEV_CONTAINER_PORT:-8080}/actuator/health"]
       interval: 10s
       timeout: 3s
       retries: 3
@@ -29,14 +24,12 @@ services:
   db-dev:
     container_name: db-dev
     image: postgres:18.0-alpine3.22
-    environment:
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-}
-      POSTGRES_DB: ${DB_NAME:-heapdog}
+    env_file:
+      - .env.dev.db
     volumes:
       - db_data_dev:/var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "${DB_DEV_HOST_PORT:-5432}:${DB_DEV_CONTAINER_PORT:-5432}"
     networks:
       - heapdog-network-dev
 
@@ -44,8 +37,8 @@ services:
     container_name: nats-dev
     image: nats:2.12.2-alpine3.22
     ports:
-      - "4223:4222"
-      - "8223:8222"
+      - "${NATS_DEV_HOST_PORT:-4222}:${NATS_DEV_CONTAINER_PORT:-4222}"
+      - "${NATS_DEV_HTTP_HOST_PORT:-8222}:${NATS_DEV_HTTP_CONTAINER_PORT:-8222}"
     networks:
       - heapdog-network-dev
 
